@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { getPinterestAuthUrl, fetchPinterestBoards } from '@/lib/pinterest/api';
-import { useStore, useAccounts, useBoards } from '@/lib/store';
+import { usePinterestContext } from '@/lib/context/PinterestContext';
 import { toast } from 'sonner';
 import { Trash2, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,9 +11,15 @@ export function Accounts() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const { user } = useAuth();
-  const { accounts, selectedAccountId, setSelectedAccount } = useAccounts();
-  const { boards, setBoards } = useBoards();
-  const { error } = useStore();
+  const { 
+    accounts, 
+    selectedAccountId, 
+    setSelectedAccount, 
+    boards,
+    setBoards,
+    removeAccount,
+    error 
+  } = usePinterestContext();
 
   useEffect(() => {
     if (error) {
@@ -59,9 +65,7 @@ export function Accounts() {
 
     try {
       setIsDisconnecting(true);
-      const store = useStore.getState();
-      store.removeAccount(accountId);
-      store.removeBoards(accountId);
+      await removeAccount(accountId);
       toast.success('Account disconnected successfully');
     } catch (error) {
       toast.error('Failed to disconnect account');
