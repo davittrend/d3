@@ -17,19 +17,24 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-    },
+    }
   },
   build: {
-    rollupOptions: {
-      external: [],
-      output: {
-        manualChunks: {
-          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
-        },
-      },
-    },
     commonjsOptions: {
       include: [/node_modules/],
+      transformMixedEsModules: true
     },
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('firebase')) {
+              return 'firebase';
+            }
+            return 'vendor';
+          }
+        }
+      }
+    }
   }
 });
